@@ -111,6 +111,11 @@ function render() {
 
    // ── TAB TITLE (new) ──────────────────────────────────────────
   document.title = `${formatTime(app.secondsLeft)} — ${getModeName(app.mode)}`;
+
+  // ── SESSION DOTS ─────────────────────────────────────────────
+  document.querySelectorAll('.dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i < app.pomodorosCompleted);
+  });
 }
 
 
@@ -161,6 +166,7 @@ function resetTimer() {
   clearInterval(app.intervalId);
   app.intervalId   = null;
   app.timerState   = STATE.IDLE;
+  app.pomodorosCompleted = 0; 
   app.secondsLeft  = app.durations[app.mode];
   app.startTime    = null;
   app.startSeconds = null;
@@ -170,15 +176,21 @@ function resetTimer() {
 
 function switchMode() {
   if (app.mode === MODE.WORK) {
-    // Pomodoro counter increment + long break check happens in Commit 7
-    // For now: always go to short break after work
-    app.mode = MODE.SHORT_BREAK;
+    // Increment counter — work session just completed
+    app.pomodorosCompleted++;
+
+    // After 4 work sessions → long break, then reset counter
+    if (app.pomodorosCompleted >= 4) {
+      app.mode = MODE.LONG_BREAK;
+      app.pomodorosCompleted = 0;
+    } else {
+      app.mode = MODE.SHORT_BREAK;
+    }
   } else {
-    // Any break → back to work
+    // Any break ended → back to work
     app.mode = MODE.WORK;
   }
 
-  // Reset the countdown to the new mode's duration
   app.secondsLeft = app.durations[app.mode];
 }
 
