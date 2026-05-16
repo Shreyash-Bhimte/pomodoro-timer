@@ -287,6 +287,7 @@ function applySettings() {
   app.durations[MODE.LONG_BREAK]  = newLongBreak   * 60;
 
   saveDurations();
+  document.getElementById('settingsPanel').removeAttribute('open'); // close panel
 
   // Only update display if timer is idle — don't interrupt active session
   if (app.timerState === STATE.IDLE) {
@@ -296,7 +297,6 @@ function applySettings() {
 }
 
 els.applySettingsBtn.addEventListener('click', applySettings);
-
 
 /* ── 7. CONTROLS ─────────────────────────────────────────────── */
 
@@ -310,6 +310,15 @@ els.startPauseBtn.addEventListener('click', () => {
 
 els.resetBtn.addEventListener('click', resetTimer);
 
+/* ── KEYBOARD SHORTCUT ───────────────────────────────────────── */
+
+document.addEventListener('keydown', (e) => {
+  // Spacebar — start or pause, but not when user is typing in settings inputs
+  if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+    e.preventDefault(); // prevent page scroll on spacebar
+    els.startPauseBtn.click();
+  }
+});
 
 /* ── 8. INIT ─────────────────────────────────────────────────── */
 

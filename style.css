@@ -314,3 +314,14 @@ body[data-state="paused"]  .settings-panel {
     text-align: center;
   }
 }
+
+/* ── 12. FINISHED STATE PULSE ────────────────────────────────── */
+
+body[data-state="finished"] .timer-display {
+  animation: pulse 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 1; }
+  to   { opacity: 0.35; }
+}
