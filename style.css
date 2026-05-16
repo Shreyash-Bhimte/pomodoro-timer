@@ -1,0 +1,122 @@
+/* ============================================================
+   POMODORO TIMER — CSS
+   Commit 3: Base layout, typography, CSS variable theme system
+   Commit 4: Controls, dots, settings, responsive
+   ============================================================ */
+
+
+/* ── 1. DESIGN TOKENS ───────────────────────────────────────── */
+/*
+  All colours live here as variables.
+  Body[data-mode] overrides the mode-specific ones.
+  Nothing else in the CSS hardcodes a colour.
+*/
+
+:root {
+  /* Neutral palette */
+  --bg:           #1a1a1a;
+  --surface:      #242424;
+  --text-primary: #f0ede8;
+  --text-muted:   #9a9590;
+  --border:       rgba(255,255,255,0.08);
+
+  /* Mode colours — work (warm) defaults */
+  --accent:       #c0674a;
+  --accent-soft:  rgba(192, 103, 74, 0.15);
+  --mode-bg:      #1f1812;
+
+  /* Typography */
+  --font-display: 'Courier New', Courier, monospace;
+  --font-ui:      system-ui, -apple-system, sans-serif;
+
+  /* Spacing rhythm */
+  --gap-sm:  0.75rem;
+  --gap-md:  1.5rem;
+  --gap-lg:  2.5rem;
+
+  /* Transitions */
+  --transition-mode: background-color 0.6s ease, color 0.6s ease;
+}
+
+/* Work mode — warm, focused, slightly amber-dark */
+body[data-mode="work"] {
+  --accent:      #c0674a;
+  --accent-soft: rgba(192, 103, 74, 0.15);
+  --mode-bg:     #1f1812;
+}
+
+/* Short break — cool, calm, blue-tinted */
+body[data-mode="short-break"] {
+  --accent:      #5b8db8;
+  --accent-soft: rgba(91, 141, 184, 0.15);
+  --mode-bg:     #111820;
+}
+
+/* Long break — deeper cool, more restful */
+body[data-mode="long-break"] {
+  --accent:      #6aab8e;
+  --accent-soft: rgba(106, 171, 142, 0.15);
+  --mode-bg:     #111a16;
+}
+
+
+/* ── 2. RESET ────────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+/* ── 3. BASE & BODY ──────────────────────────────────────────── */
+
+body {
+  font-family: var(--font-ui);
+  background-color: var(--mode-bg);
+  color: var(--text-primary);
+  min-height: 100dvh;           /* dvh: handles mobile browser chrome correctly */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-mode);
+  padding: var(--gap-md);
+}
+
+
+/* ── 4. APP WRAPPER ──────────────────────────────────────────── */
+
+.app-wrapper {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-lg);
+}
+
+
+/* ── 5. MODE LABEL ───────────────────────────────────────────── */
+
+.mode-label {
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  transition: color 0.6s ease;
+}
+
+
+/* ── 6. TIMER DISPLAY ────────────────────────────────────────── */
+
+.timer-display {
+  font-family: var(--font-display);
+  font-size: clamp(4.5rem, 22vw, 7rem);  /* scales with viewport, never tiny or huge */
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+  user-select: none;                      /* prevent accidental text selection on click */
+}
