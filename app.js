@@ -108,6 +108,9 @@ function render() {
   // Body data attributes — drives ALL CSS (theme + state visibility)
   document.body.dataset.state = app.timerState;
   document.body.dataset.mode  = app.mode;
+
+   // ── TAB TITLE (new) ──────────────────────────────────────────
+  document.title = `${formatTime(app.secondsLeft)} — ${getModeName(app.mode)}`;
 }
 
 
@@ -165,16 +168,30 @@ function resetTimer() {
   render();
 }
 
+function switchMode() {
+  if (app.mode === MODE.WORK) {
+    // Pomodoro counter increment + long break check happens in Commit 7
+    // For now: always go to short break after work
+    app.mode = MODE.SHORT_BREAK;
+  } else {
+    // Any break → back to work
+    app.mode = MODE.WORK;
+  }
+
+  // Reset the countdown to the new mode's duration
+  app.secondsLeft = app.durations[app.mode];
+}
+
 function handleSessionEnd() {
-  // Stop the interval
   clearInterval(app.intervalId);
   app.intervalId = null;
   app.timerState = STATE.FINISHED;
 
-  // Mode switching + counter logic added in Commits 6 & 7
-  // For now: just reset to idle after a brief pause
+  render(); // flash the 00:00 state briefly
+
   setTimeout(() => {
-    app.timerState = STATE.IDLE;
+    switchMode();                   // transition to next mode
+    app.timerState = STATE.IDLE;    // land in idle, ready to start
     render();
   }, 1500);
 }
