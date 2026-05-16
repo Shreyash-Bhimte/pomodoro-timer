@@ -84,6 +84,29 @@ function getModeName(mode) {
   }[mode];
 }
 
+/* ── LOCALSTORAGE ────────────────────────────────────────────── */
+
+const STORAGE_KEY = 'pomodoro-durations';
+
+function saveDurations() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(app.durations));
+}
+
+function loadDurations() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) return; // no saved prefs yet — keep defaults
+
+  try {
+    const parsed = JSON.parse(saved);
+    // Validate each value — guard against corrupted storage
+    if (parsed[MODE.WORK]        > 0) app.durations[MODE.WORK]        = parsed[MODE.WORK];
+    if (parsed[MODE.SHORT_BREAK] > 0) app.durations[MODE.SHORT_BREAK] = parsed[MODE.SHORT_BREAK];
+    if (parsed[MODE.LONG_BREAK]  > 0) app.durations[MODE.LONG_BREAK]  = parsed[MODE.LONG_BREAK];
+  } catch {
+    // Corrupted JSON — silently ignore, keep defaults
+  }
+}
+
 /* ── AUDIO ───────────────────────────────────────────────────── */
 
 function playBeep() {
@@ -248,6 +271,32 @@ function handleSessionEnd() {
   }, 1500);
 }
 
+/* ── SETTINGS HANDLER ────────────────────────────────────────── */
+
+function applySettings() {
+  // Read input values — convert minutes to seconds
+  const newWork       = parseInt(els.workDuration.value, 10);
+  const newShortBreak = parseInt(els.shortBreakDuration.value, 10);
+  const newLongBreak  = parseInt(els.longBreakDuration.value, 10);
+
+  // Validate — inputs have min/max in HTML but parseInt can still produce NaN
+  if (!newWork || !newShortBreak || !newLongBreak) return;
+
+  app.durations[MODE.WORK]        = newWork        * 60;
+  app.durations[MODE.SHORT_BREAK] = newShortBreak  * 60;
+  app.durations[MODE.LONG_BREAK]  = newLongBreak   * 60;
+
+  saveDurations();
+
+  // Only update display if timer is idle — don't interrupt active session
+  if (app.timerState === STATE.IDLE) {
+    app.secondsLeft = app.durations[app.mode];
+    render();
+  }
+}
+
+els.applySettingsBtn.addEventListener('click', applySettings);
+
 
 /* ── 7. CONTROLS ─────────────────────────────────────────────── */
 
@@ -264,4 +313,20 @@ els.resetBtn.addEventListener('click', resetTimer);
 
 /* ── 8. INIT ─────────────────────────────────────────────────── */
 
-render(); // draw initial state on page load
+function init() {
+  // Load saved durations from localStorage (if any)
+  loadDurations();
+
+  // Sync secondsLeft to the (possibly loaded) work duration
+  app.secondsLeft = app.durations[app.mode];
+
+  // Sync input fields to match loaded values — so settings panel
+  // shows the actual current durations, not hardcoded HTML defaults
+  els.workDuration.value       = app.durations[MODE.WORK]        / 60;
+  els.shortBreakDuration.value = app.durations[MODE.SHORT_BREAK] / 60;
+  els.longBreakDuration.value  = app.durations[MODE.LONG_BREAK]  / 60;
+
+  render();
+}
+
+init();
