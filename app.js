@@ -84,6 +84,44 @@ function getModeName(mode) {
   }[mode];
 }
 
+/* ── AUDIO ───────────────────────────────────────────────────── */
+
+function playBeep() {
+  // AudioContext must be created in response to a user gesture.
+  // By the time this runs, the user has already clicked Start —
+  // so we're safe. We create a fresh context each time; it's
+  // lightweight and avoids managing context lifecycle.
+  const ctx        = new AudioContext();
+  const oscillator = ctx.createOscillator();
+  const gain       = ctx.createGain();
+
+  // Wire the signal chain: oscillator → gain → speakers
+  oscillator.connect(gain);
+  gain.connect(ctx.destination);
+
+  // Tone character — sine wave at 660 Hz (soft, clear, not harsh)
+  oscillator.type      = 'sine';
+  oscillator.frequency.value = 660;
+
+  // Envelope — schedule gain changes on the audio clock, not JS clock
+  // ctx.currentTime is the audio context's own high-precision timestamp
+  const now     = ctx.currentTime;
+  const fadeIn  = 0.01;   // 10ms ramp up — avoids click
+  const hold    = 0.25;   // 250ms at full volume
+  const fadeOut = 0.15;   // 150ms ramp down — soft tail
+
+  gain.gain.setValueAtTime(0, now);                          // start at silence
+  gain.gain.linearRampToValueAtTime(0.4, now + fadeIn);     // ramp to 40% volume
+  gain.gain.setValueAtTime(0.4, now + fadeIn + hold);        // hold
+  gain.gain.linearRampToValueAtTime(0, now + fadeIn + hold + fadeOut); // fade out
+
+  // Start and stop the oscillator on the same audio timeline
+  oscillator.start(now);
+  oscillator.stop(now + fadeIn + hold + fadeOut + 0.05);    // tiny buffer after fade
+
+  // Clean up — close the context after the sound is done
+  oscillator.onended = () => ctx.close();
+}
 
 /* ── 5. RENDER ───────────────────────────────────────────────── */
 /*
@@ -199,6 +237,8 @@ function handleSessionEnd() {
   app.intervalId = null;
   app.timerState = STATE.FINISHED;
 
+  playBeep(); // Play a sound to indicate session end
+  
   render(); // flash the 00:00 state briefly
 
   setTimeout(() => {
