@@ -120,3 +120,197 @@ body {
   color: var(--text-primary);
   user-select: none;                      /* prevent accidental text selection on click */
 }
+
+/* ── 7. CONTROLS ─────────────────────────────────────────────── */
+
+.controls {
+  display: flex;
+  gap: var(--gap-sm);
+}
+
+.btn {
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0.75rem 1.75rem;
+  transition: background-color 0.2s ease,
+              color 0.2s ease,
+              transform 0.1s ease;
+  -webkit-tap-highlight-color: transparent; /* removes blue flash on mobile tap */
+}
+
+.btn:active {
+  transform: scale(0.96);   /* subtle press feedback — better than nothing */
+}
+
+.btn-primary {
+  background-color: var(--accent);
+  color: #fff;
+  min-width: 120px;         /* stays wide enough when label changes Start↔Pause */
+}
+
+.btn-primary:hover {
+  filter: brightness(1.15);
+}
+
+.btn-secondary {
+  background-color: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  color: var(--text-primary);
+  border-color: rgba(255,255,255,0.18);
+}
+
+
+/* ── 8. SESSION DOTS ─────────────────────────────────────────── */
+
+.session-dots {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--surface);
+  border: 1.5px solid var(--border);
+  transition: background-color 0.3s ease,
+              border-color 0.3s ease;
+}
+
+.dot.active {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+
+/* ── 9. SETTINGS PANEL ───────────────────────────────────────── */
+
+.settings-panel {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;           /* clips children to rounded corners */
+}
+
+.settings-toggle {
+  display: block;
+  padding: 0.75rem var(--gap-md);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;           /* hides default <details> arrow in Firefox */
+  transition: color 0.2s ease;
+}
+
+/* hides default arrow in Chrome/Safari */
+.settings-toggle::-webkit-details-marker { display: none; }
+
+.settings-toggle::after {
+  content: '▾';
+  float: right;
+  transition: transform 0.2s ease;
+}
+
+details[open] .settings-toggle::after {
+  transform: rotate(-180deg);
+}
+
+.settings-toggle:hover {
+  color: var(--text-primary);
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--gap-sm);
+  padding: 0 var(--gap-md) var(--gap-md);
+}
+
+.settings-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.settings-grid input[type="number"] {
+  background-color: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  padding: 0.5rem;
+  text-align: center;
+  width: 100%;
+  /* hide browser spinner arrows — clean minimal look */
+  -moz-appearance: textfield;
+}
+
+.settings-grid input[type="number"]::-webkit-outer-spin-button,
+.settings-grid input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.settings-grid input[type="number"]:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-color: transparent;
+}
+
+#applySettingsBtn {
+  display: block;
+  margin: 0 var(--gap-md) var(--gap-md);
+  width: calc(100% - 2 * var(--gap-md));
+}
+
+
+/* ── 10. STATE-DRIVEN VISIBILITY ─────────────────────────────── */
+/*
+  This is the state machine doing real work in CSS.
+  JS sets body[data-state]. CSS decides what's interactive.
+  No JS touches individual elements for show/hide.
+*/
+
+/* Settings should close and be non-interactive while timer is running */
+body[data-state="running"] .settings-panel,
+body[data-state="paused"]  .settings-panel {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+
+/* ── 11. RESPONSIVE ──────────────────────────────────────────── */
+
+@media (max-width: 400px) {
+  .settings-grid {
+    grid-template-columns: 1fr;   /* stack inputs vertically on narrow screens */
+  }
+
+  .controls {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn {
+    width: 100%;
+    text-align: center;
+  }
+}
