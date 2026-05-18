@@ -335,7 +335,7 @@ function init() {
   els.shortBreakDuration.value = app.durations[MODE.SHORT_BREAK] / 60;
   els.longBreakDuration.value  = app.durations[MODE.LONG_BREAK]  / 60;
 
-  render();
+  render(); 
 }
 
 init();
